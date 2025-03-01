@@ -1,41 +1,40 @@
 import { Metadata } from "next"
-
-import FeaturedProducts from "@modules/home/components/featured-products"
-import Hero from "@modules/home/components/hero"
-import { listCollections } from "@lib/data/collections"
+import { listCategories } from "@lib/data/categories"
 import { getRegion } from "@lib/data/regions"
+import { notFound } from "next/navigation"
+import HomeContent from "@modules/home/components/home-content"
 
 export const metadata: Metadata = {
-  title: "Medusa Next.js Starter Template",
-  description:
-    "A performant frontend ecommerce starter template with Next.js 14 and Medusa.",
+  title: "Emperor's Clothing | Luxury Streetwear & Fashion",
+  description: "Discover our exclusive collection of luxury streetwear and fashion. Shop the latest trends and timeless classics.",
 }
 
-export default async function Home(props: {
-  params: Promise<{ countryCode: string }>
-}) {
-  const params = await props.params
+async function getData(countryCode: string) {
+  const [categories, region] = await Promise.all([
+    listCategories(),
+    getRegion(countryCode),
+  ])
 
-  const { countryCode } = params
-
-  const region = await getRegion(countryCode)
-
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  })
-
-  if (!collections || !region) {
-    return null
+  if (!region) {
+    notFound()
   }
 
+  return { categories, region }
+}
+
+export default async function HomePage({
+  params,
+}: {
+  params: { countryCode: string }
+}) {
+  const data = await getData(params.countryCode)
+
   return (
-    <>
-      <Hero />
-      <div className="py-12">
-        <ul className="flex flex-col gap-x-6">
-          <FeaturedProducts collections={collections} region={region} />
-        </ul>
-      </div>
-    </>
+    <main className="relative">
+      <HomeContent 
+        categories={data.categories}
+        region={data.region}
+      />
+    </main>
   )
 }

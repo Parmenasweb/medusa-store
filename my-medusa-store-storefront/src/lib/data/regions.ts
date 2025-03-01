@@ -2,7 +2,7 @@
 
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
-import { HttpTypes } from "@medusajs/types"
+import { HttpTypes, StoreRegion } from "@medusajs/types"
 import { getCacheOptions } from "./cookies"
 
 export const listRegions = async () => {
@@ -37,30 +37,25 @@ export const retrieveRegion = async (id: string) => {
 
 const regionMap = new Map<string, HttpTypes.StoreRegion>()
 
-export const getRegion = async (countryCode: string) => {
-  try {
-    if (regionMap.has(countryCode)) {
-      return regionMap.get(countryCode)
+export async function getRegion(countryCode: string): Promise<StoreRegion | null> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/regions`,
+    {
+      next: { revalidate: 3600 }, // Cache for 1 hour
+      headers: {
+        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+      },
     }
+  )
 
-    const regions = await listRegions()
-
-    if (!regions) {
-      return null
-    }
-
-    regions.forEach((region) => {
-      region.countries?.forEach((c) => {
-        regionMap.set(c?.iso_2 ?? "", region)
-      })
-    })
-
-    const region = countryCode
-      ? regionMap.get(countryCode)
-      : regionMap.get("us")
-
-    return region
-  } catch (e: any) {
-    return null
+  if (!response.ok) {
+    throw new Error("Failed to fetch regions")
   }
+
+  const { regions } = await response.json()
+  const region = regions.find((r: StoreRegion) =>
+    r.countries?.some((c) => c.iso_2?.toLowerCase() === countryCode.toLowerCase())
+  )
+
+  return region || null
 }

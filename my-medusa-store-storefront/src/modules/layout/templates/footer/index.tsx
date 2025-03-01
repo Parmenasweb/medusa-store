@@ -1,157 +1,177 @@
-import { listCategories } from "@lib/data/categories"
-import { listCollections } from "@lib/data/collections"
-import { Text, clx } from "@medusajs/ui"
+"use client"
 
+import { motion } from "framer-motion"
+import { Container } from "@medusajs/ui"
+import { StoreProductCategory } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import MedusaCTA from "@modules/layout/components/medusa-cta"
+import { Github, Twitter, Instagram, Facebook } from "lucide-react"
 
-export default async function Footer() {
-  const { collections } = await listCollections({
-    fields: "*products",
-  })
-  const productCategories = await listCategories()
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0
+  }
+}
+
+const footerLinks = {
+  support: [
+    { text: "Help Center", href: "/help" },
+    { text: "Contact Us", href: "/contact" },
+    { text: "Size Guide", href: "/size-guide" },
+    { text: "Shipping Information", href: "/shipping" },
+    { text: "Returns & Exchanges", href: "/shipping#returns" }
+  ],
+  about: [
+    { text: "About Us", href: "/about" },
+    { text: "Careers", href: "/careers" },
+    { text: "Blog", href: "/blog" },
+    { text: "Store Locations", href: "/stores" }
+  ],
+  legal: [
+    { text: "Terms of Service", href: "/terms" },
+    { text: "Privacy Policy", href: "/privacy" },
+    { text: "Cookie Policy", href: "/cookies" }
+  ],
+  social: [
+    { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
+    { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
+    { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
+    { icon: Github, href: "https://github.com", label: "GitHub" }
+  ]
+}
+
+type FooterProps = {
+  categories: StoreProductCategory[]
+}
+
+export default function Footer({ categories }: FooterProps) {
+  const parentCategories = categories?.filter(category => !category.parent_category)
 
   return (
-    <footer className="border-t border-ui-border-base w-full">
-      <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-6 xsmall:flex-row items-start justify-between py-40">
-          <div>
-            <LocalizedClientLink
-              href="/"
-              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
-            >
-              Medusa Store
-            </LocalizedClientLink>
-          </div>
-          <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
-            {productCategories && productCategories?.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  Categories
-                </span>
-                <ul
-                  className="grid grid-cols-1 gap-2"
-                  data-testid="footer-categories"
-                >
-                  {productCategories?.slice(0, 6).map((c) => {
-                    if (c.parent_category) {
-                      return
-                    }
-
-                    const children =
-                      c.category_children?.map((child) => ({
-                        name: child.name,
-                        handle: child.handle,
-                        id: child.id,
-                      })) || null
-
-                    return (
-                      <li
-                        className="flex flex-col gap-2 text-ui-fg-subtle txt-small"
-                        key={c.id}
-                      >
-                        <LocalizedClientLink
-                          className={clx(
-                            "hover:text-ui-fg-base",
-                            children && "txt-small-plus"
-                          )}
-                          href={`/categories/${c.handle}`}
-                          data-testid="category-link"
-                        >
-                          {c.name}
-                        </LocalizedClientLink>
-                        {children && (
-                          <ul className="grid grid-cols-1 ml-3 gap-2">
-                            {children &&
-                              children.map((child) => (
-                                <li key={child.id}>
-                                  <LocalizedClientLink
-                                    className="hover:text-ui-fg-base"
-                                    href={`/categories/${child.handle}`}
-                                    data-testid="category-link"
-                                  >
-                                    {child.name}
-                                  </LocalizedClientLink>
-                                </li>
-                              ))}
-                          </ul>
-                        )}
-                      </li>
-                    )
-                  })}
-                </ul>
+    <footer className="bg-white dark:bg-emperor-950 border-t border-emperor-200 dark:border-emperor-800">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="py-16"
+      >
+        <Container>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+            {/* Categories */}
+            <motion.div variants={itemVariants} className="lg:col-span-2">
+              <h3 className="text-emperor-950 dark:text-white font-display text-xl mb-6">
+                Categories
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                {parentCategories?.map((category) => (
+                  <LocalizedClientLink
+                    key={category.id}
+                    href={`/categories/${category.handle}`}
+                    className="text-emperor-600 dark:text-emperor-300 hover:text-emperor-950 dark:hover:text-white transition-colors"
+                  >
+                    {category.name}
+                  </LocalizedClientLink>
+                ))}
               </div>
-            )}
-            {collections && collections.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  Collections
-                </span>
-                <ul
-                  className={clx(
-                    "grid grid-cols-1 gap-2 text-ui-fg-subtle txt-small",
-                    {
-                      "grid-cols-2": (collections?.length || 0) > 3,
-                    }
-                  )}
-                >
-                  {collections?.slice(0, 6).map((c) => (
-                    <li key={c.id}>
-                      <LocalizedClientLink
-                        className="hover:text-ui-fg-base"
-                        href={`/collections/${c.handle}`}
-                      >
-                        {c.title}
-                      </LocalizedClientLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">Medusa</span>
-              <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-                <li>
-                  <a
-                    href="https://github.com/medusajs"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    GitHub
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://docs.medusajs.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Documentation
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://github.com/medusajs/nextjs-starter-medusa"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Source code
-                  </a>
-                </li>
+            </motion.div>
+
+            {/* Support */}
+            <motion.div variants={itemVariants}>
+              <h3 className="text-emperor-950 dark:text-white font-display text-xl mb-6">
+                Support
+              </h3>
+              <ul className="space-y-4">
+                {footerLinks.support.map((link) => (
+                  <li key={link.text}>
+                    <LocalizedClientLink
+                      href={link.href}
+                      className="text-emperor-600 dark:text-emperor-300 hover:text-emperor-950 dark:hover:text-white transition-colors"
+                    >
+                      {link.text}
+                    </LocalizedClientLink>
+                  </li>
+                ))}
               </ul>
-            </div>
+            </motion.div>
+
+            {/* About */}
+            <motion.div variants={itemVariants}>
+              <h3 className="text-emperor-950 dark:text-white font-display text-xl mb-6">
+                About
+              </h3>
+              <ul className="space-y-4">
+                {footerLinks.about.map((link) => (
+                  <li key={link.text}>
+                    <LocalizedClientLink
+                      href={link.href}
+                      className="text-emperor-600 dark:text-emperor-300 hover:text-emperor-950 dark:hover:text-white transition-colors"
+                    >
+                      {link.text}
+                    </LocalizedClientLink>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Legal */}
+            <motion.div variants={itemVariants}>
+              <h3 className="text-emperor-950 dark:text-white font-display text-xl mb-6">
+                Legal
+              </h3>
+              <ul className="space-y-4">
+                {footerLinks.legal.map((link) => (
+                  <li key={link.text}>
+                    <LocalizedClientLink
+                      href={link.href}
+                      className="text-emperor-600 dark:text-emperor-300 hover:text-emperor-950 dark:hover:text-white transition-colors"
+                    >
+                      {link.text}
+                    </LocalizedClientLink>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
           </div>
-        </div>
-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
-          <Text className="txt-compact-small">
-            © {new Date().getFullYear()} Medusa Store. All rights reserved.
-          </Text>
-          <MedusaCTA />
-        </div>
-      </div>
+
+          {/* Bottom Section */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-12 pt-8 border-t border-emperor-200 dark:border-emperor-800"
+          >
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-emperor-600 dark:text-emperor-300">
+                © {new Date().getFullYear()} Emperor's Clothing. All rights reserved.
+              </p>
+              <div className="flex items-center gap-4">
+                {footerLinks.social.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emperor-600 dark:text-emperor-300 hover:text-emperor-950 dark:hover:text-white transition-colors"
+                    aria-label={social.label}
+                  >
+                    <social.icon className="w-5 h-5" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </Container>
+      </motion.div>
     </footer>
   )
 }

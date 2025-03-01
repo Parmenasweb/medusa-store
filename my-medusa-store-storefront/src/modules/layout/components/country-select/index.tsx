@@ -57,9 +57,26 @@ const CountrySelect = ({ toggleState, regions }: CountrySelectProps) => {
     }
   }, [options, countryCode])
 
-  const handleChange = (option: CountryOption) => {
-    updateRegion(option.country, currentPath)
-    close()
+  const handleChange = async (option: CountryOption) => {
+    try {
+      // Update region in backend
+      await updateRegion(option.country, currentPath)
+
+      // Force revalidate products to get new prices
+      const response = await fetch(`/api/revalidate?tag=products`, {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to revalidate products')
+      }
+
+      // Close the selector
+      close()
+    } catch (error) {
+      console.error('Error updating region:', error)
+      // You might want to show an error toast here
+    }
   }
 
   return (

@@ -1,29 +1,30 @@
 import { sdk } from "@lib/config"
-import { HttpTypes } from "@medusajs/types"
+import { HttpTypes, StoreProductCategory } from "@medusajs/types"
 import { getCacheOptions } from "./cookies"
 
-export const listCategories = async (query?: Record<string, any>) => {
-  const next = {
-    ...(await getCacheOptions("categories")),
+export async function listCategories(): Promise<StoreProductCategory[]> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/product-categories?include_descendants_tree=true&fields=*category_children`,
+    {
+      next: { revalidate: 3600 }, // Cache for 1 hour
+      headers: {
+        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+      },
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch categories")
   }
 
-  const limit = query?.limit || 100
+  const { product_categories } = await response.json()
+  
+  // Filter to get only root categories (those without parent)
+  const rootCategories = product_categories.filter(
+    (category: StoreProductCategory) => !category.parent_category_id
+  )
 
-  return sdk.client
-    .fetch<{ product_categories: HttpTypes.StoreProductCategory[] }>(
-      "/store/product-categories",
-      {
-        query: {
-          fields:
-            "*category_children, *products, *parent_category, *parent_category.parent_category",
-          limit,
-          ...query,
-        },
-        next,
-        cache: "force-cache",
-      }
-    )
-    .then(({ product_categories }) => product_categories)
+  return rootCategories
 }
 
 export const getCategoryByHandle = async (categoryHandle: string[]) => {

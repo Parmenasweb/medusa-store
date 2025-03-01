@@ -1,10 +1,11 @@
 const path = require("path")
+const { nextui } = require("@nextui-org/react")
 
 module.exports = {
   darkMode: "class",
   presets: [require("@medusajs/ui-preset")],
   content: [
-    "./src/app/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
     "./src/pages/**/*.{js,ts,jsx,tsx}",
     "./src/components/**/*.{js,ts,jsx,tsx}",
     "./src/modules/**/*.{js,ts,jsx,tsx}",
@@ -34,6 +35,23 @@ module.exports = {
           80: "#1F2937",
           90: "#111827",
         },
+        emperor: {
+          50: '#f7f7f7',
+          100: '#e3e3e3',
+          200: '#c8c8c8',
+          300: '#a4a4a4',
+          400: '#818181',
+          500: '#666666',
+          600: '#515151',
+          700: '#434343',
+          800: '#383838',
+          900: '#313131',
+          950: '#1a1a1a',
+        },
+        accent: {
+          DEFAULT: '#FF3366',
+          dark: '#E61E4D'
+        }
       },
       borderRadius: {
         none: "0px",
@@ -59,16 +77,8 @@ module.exports = {
         "3xl": "2rem",
       },
       fontFamily: {
-        sans: [
-          "Inter",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "Segoe UI",
-          "Roboto",
-          "Helvetica Neue",
-          "Ubuntu",
-          "sans-serif",
-        ],
+        sans: ['var(--font-inter)'],
+        display: ['var(--font-bebas)'],
       },
       keyframes: {
         ring: {
@@ -140,6 +150,14 @@ module.exports = {
           "0%": { transform: "translateY(-100%)" },
           "100%": { transform: "translateY(0)" },
         },
+        "fade-in": {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        "slide-up": {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
       },
       animation: {
         ring: "ring 2.2s cubic-bezier(0.5, 0, 0.5, 1) infinite",
@@ -155,8 +173,36 @@ module.exports = {
         enter: "enter 200ms ease-out",
         "slide-in": "slide-in 1.2s cubic-bezier(.41,.73,.51,1.02)",
         leave: "leave 150ms ease-in forwards",
+        "fade-in": 'fade-in 0.5s ease-in-out',
+        "slide-in": 'slide-in 0.5s ease-in-out',
+        "slide-up": 'slide-up 0.5s ease-in-out',
       },
     },
   },
-  plugins: [require("tailwindcss-radix")()],
+  plugins: [
+    require("@tailwindcss/typography"),
+    nextui({
+      themes: {
+        dark: {
+          colors: {
+            background: "#1a1a1a",
+            foreground: "#ffffff",
+            primary: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              800: '#9f1239',
+              900: '#881337',
+              950: '#4c0519',
+            }
+          }
+        }
+      }
+    })
+  ],
 }
