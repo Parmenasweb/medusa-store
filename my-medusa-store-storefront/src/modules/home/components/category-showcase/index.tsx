@@ -11,7 +11,8 @@ import {
   Sparkles, 
   Tag, 
   TrendingUp,
-  ShoppingBag
+  ShoppingBag,
+  ArrowRight
 } from "lucide-react"
 
 const containerVariants = {
@@ -38,15 +39,15 @@ type CategoryMetadata = {
   description?: string
 }
 
-// Category icons mapping
+// Category icons mapping with colors
 const CATEGORY_ICONS = {
-  "streetwear": Shirt,
-  "luxury": Crown,
-  "accessories": Watch,
-  "new-arrivals": Sparkles,
-  "sale": Tag,
-  "trending": TrendingUp,
-  "default": ShoppingBag
+  "streetwear": { icon: Shirt, color: "from-blue-500 to-indigo-600" },
+  "luxury": { icon: Crown, color: "from-amber-500 to-yellow-600" },
+  "accessories": { icon: Watch, color: "from-emerald-500 to-green-600" },
+  "new-arrivals": { icon: Sparkles, color: "from-purple-500 to-violet-600" },
+  "sale": { icon: Tag, color: "from-rose-500 to-red-600" },
+  "trending": { icon: TrendingUp, color: "from-cyan-500 to-blue-600" },
+  "default": { icon: ShoppingBag, color: "from-gray-500 to-slate-600" }
 } as const
 
 type CategoryShowcaseProps = {
@@ -61,20 +62,23 @@ export default function CategoryShowcase({ categories }: CategoryShowcaseProps) 
   }).slice(0, 6)
 
   return (
-    <section className="py-16 bg-white dark:bg-emperor-950">
+    <section className="py-24 bg-white dark:bg-emperor-950">
       <Container>
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="space-y-12"
+          className="space-y-16"
         >
-          <motion.div variants={itemVariants} className="text-center">
-            <h2 className="text-3xl md:text-4xl font-display text-emperor-950 dark:text-white mb-4">
+          <motion.div variants={itemVariants} className="text-center max-w-3xl mx-auto space-y-4">
+            <span className="text-sm font-medium text-emperor-600 dark:text-emperor-400">
+              BROWSE BY CATEGORY
+            </span>
+            <h2 className="text-3xl md:text-4xl font-display text-emperor-950 dark:text-white">
               Shop by Category
             </h2>
-            <p className="text-emperor-600 dark:text-emperor-300 max-w-2xl mx-auto">
+            <p className="text-emperor-600 dark:text-emperor-300">
               Explore our curated collections and find your perfect style
             </p>
           </motion.div>
@@ -85,28 +89,48 @@ export default function CategoryShowcase({ categories }: CategoryShowcaseProps) 
           >
             {showcaseCategories.map((category) => {
               const metadata = category.metadata as CategoryMetadata | null
-              const IconComponent = CATEGORY_ICONS[category.handle as keyof typeof CATEGORY_ICONS] || CATEGORY_ICONS.default
+              const categoryConfig = CATEGORY_ICONS[category.handle as keyof typeof CATEGORY_ICONS] || CATEGORY_ICONS.default
+              const IconComponent = categoryConfig.icon
 
               return (
                 <motion.div
                   key={category.id}
                   variants={itemVariants}
+                  whileHover={{ y: -5 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <LocalizedClientLink
                     href={`/categories/${category.handle}`}
-                    className="group flex flex-col items-center text-center p-6 rounded-lg bg-emperor-50 dark:bg-emperor-900 hover:bg-emperor-100 dark:hover:bg-emperor-800 transition-colors"
+                    className="group block"
                   >
-                    <div className="w-16 h-16 rounded-full bg-emperor-100 dark:bg-emperor-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <IconComponent className="w-8 h-8 text-emperor-950 dark:text-white" />
+                    <div className="relative">
+                      {/* Background Card */}
+                      <div className="aspect-[4/3] rounded-2xl bg-gradient-to-b from-emperor-100 to-emperor-50 dark:from-emperor-900 dark:to-emperor-800 p-6 flex flex-col items-center justify-center gap-4 transition-transform duration-300 group-hover:scale-[0.97]">
+                        {/* Icon Container */}
+                        <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${categoryConfig.color} flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+                          <IconComponent className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="text-center">
+                          <h3 className="text-lg font-display text-emperor-950 dark:text-white">
+                            {category.name}
+                          </h3>
+                          {metadata?.description && (
+                            <p className="text-sm text-emperor-600 dark:text-emperor-300 mt-1 line-clamp-2">
+                              {metadata.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Hover Effect Overlay */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-emperor-950/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
-                    <h3 className="text-lg font-display text-emperor-950 dark:text-white mb-1">
-                      {category.name}
-                    </h3>
-                    {metadata?.description && (
-                      <p className="text-sm text-emperor-600 dark:text-emperor-300">
-                        {metadata.description}
-                      </p>
-                    )}
+
+                    {/* View Category Link */}
+                    <div className="mt-4 flex items-center justify-center gap-2 text-sm font-medium text-emperor-600 dark:text-emperor-400 group-hover:text-emperor-950 dark:group-hover:text-white transition-colors">
+                      View Category
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </div>
                   </LocalizedClientLink>
                 </motion.div>
               )
@@ -116,9 +140,10 @@ export default function CategoryShowcase({ categories }: CategoryShowcaseProps) 
           <motion.div variants={itemVariants} className="text-center">
             <LocalizedClientLink
               href="/store"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-emperor-950 dark:bg-white text-white dark:text-emperor-950 rounded-full hover:bg-emperor-800 dark:hover:bg-emperor-100 transition-colors font-medium"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-emperor-950 dark:bg-white text-white dark:text-emperor-950 rounded-full hover:bg-emperor-800 dark:hover:bg-emperor-100 transition-colors font-medium group"
             >
               View All Categories
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </LocalizedClientLink>
           </motion.div>
         </motion.div>

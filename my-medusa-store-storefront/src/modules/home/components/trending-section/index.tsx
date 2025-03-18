@@ -5,7 +5,7 @@ import { Container } from "@medusajs/ui"
 import { StoreRegion } from "@medusajs/types"
 import { useProducts } from "@lib/hooks/use-products"
 import ProductPreview from "@modules/products/components/product-preview"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, TrendingUp } from "lucide-react"
 import { useRef } from "react"
 
 const containerVariants = {
@@ -55,73 +55,87 @@ export default function TrendingSection({ region }: TrendingSectionProps) {
   }
 
   return (
-    <section className="py-16 bg-white dark:bg-emperor-950">
+    <section className="py-24 bg-white dark:bg-emperor-950 overflow-hidden">
       <Container>
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="space-y-12"
+          className="space-y-16"
         >
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-display text-emperor-950 dark:text-white mb-2">
-                Trending Now
+          <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div className="space-y-4 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 border border-amber-200/30 dark:border-amber-800/30">
+                <TrendingUp className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span className="text-sm font-medium text-amber-600 dark:text-amber-400">Trending Now</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-display text-emperor-950 dark:text-white">
+                Most Popular Items
               </h2>
               <p className="text-emperor-600 dark:text-emperor-300">
-                Shop our most popular items this season
+                Shop our best-selling products loved by our customers
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => scroll("left")}
-                className="p-2 rounded-full bg-emperor-100 dark:bg-emperor-800 text-emperor-600 dark:text-emperor-300 hover:bg-emperor-200 dark:hover:bg-emperor-700 transition-colors"
+                className="p-3 rounded-full bg-emperor-100 dark:bg-emperor-800 text-emperor-600 dark:text-emperor-300 hover:bg-emperor-200 dark:hover:bg-emperor-700 transition-colors disabled:opacity-50"
+                disabled={isLoading}
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={() => scroll("right")}
-                className="p-2 rounded-full bg-emperor-100 dark:bg-emperor-800 text-emperor-600 dark:text-emperor-300 hover:bg-emperor-200 dark:hover:bg-emperor-700 transition-colors"
+                className="p-3 rounded-full bg-emperor-100 dark:bg-emperor-800 text-emperor-600 dark:text-emperor-300 hover:bg-emperor-200 dark:hover:bg-emperor-700 transition-colors disabled:opacity-50"
+                disabled={isLoading}
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
-          </div>
+          </motion.div>
 
-          <motion.div
-            ref={containerRef}
-            variants={containerVariants}
-            className="relative -mx-4 px-4"
-          >
-            <div className="overflow-x-auto scrollbar-hide">
-              <div className="flex gap-4 min-w-max pb-4">
+          <div className="relative -mx-4 px-4">
+            <motion.div
+              ref={containerRef}
+              variants={containerVariants}
+              className="overflow-x-auto scrollbar-hide"
+            >
+              <div className="flex gap-6 min-w-max pb-4">
                 {isLoading ? (
-                  // Loading skeletons
-                  Array.from({ length: 4 }).map((_, i) => (
+                  // Loading skeletons with shimmer effect
+                  Array.from({ length: 6 }).map((_, i) => (
                     <div
                       key={i}
-                      className="w-[300px] h-[400px] bg-emperor-100 dark:bg-emperor-800 rounded-lg animate-pulse"
-                    />
+                      className="relative w-[300px] aspect-[3/4] bg-emperor-100 dark:bg-emperor-800 rounded-2xl overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
+                    </div>
                   ))
                 ) : (
                   products.map((product) => (
                     <motion.div
                       key={product.id}
                       variants={itemVariants}
-                      className="min-w-[300px]"
+                      whileHover={{ y: -5 }}
+                      transition={{ duration: 0.2 }}
+                      className="group w-[300px]"
                     >
-                      <ProductPreview product={product} region={region} isFeatured={false} />
+                      <div className="relative">
+                        <ProductPreview product={product} region={region} />
+                        {/* Hover Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-emperor-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none" />
+                      </div>
                     </motion.div>
                   ))
                 )}
               </div>
-            </div>
+            </motion.div>
 
             {/* Gradient overlays */}
-            <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-white dark:from-emperor-950 to-transparent pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white dark:from-emperor-950 to-transparent pointer-events-none" />
-          </motion.div>
+            <div className="absolute left-0 top-0 bottom-4 w-4 bg-gradient-to-r from-white dark:from-emperor-950 to-transparent pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-4 w-4 bg-gradient-to-l from-white dark:from-emperor-950 to-transparent pointer-events-none" />
+          </div>
         </motion.div>
       </Container>
     </section>

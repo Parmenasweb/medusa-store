@@ -36,21 +36,29 @@ module.exports = {
           90: "#111827",
         },
         emperor: {
-          50: '#f7f7f7',
-          100: '#e3e3e3',
-          200: '#c8c8c8',
-          300: '#a4a4a4',
-          400: '#818181',
-          500: '#666666',
-          600: '#515151',
-          700: '#434343',
-          800: '#383838',
-          900: '#313131',
-          950: '#1a1a1a',
+          50: "#fafafa",
+          100: "#f4f4f5",
+          200: "#e4e4e7",
+          300: "#d1d1d6",
+          400: "#a0a0ab",
+          500: "#70707b",
+          600: "#51525c",
+          700: "#3f3f46",
+          800: "#27272a",
+          900: "#18181b",
+          950: "#101012",
         },
         accent: {
           DEFAULT: '#FF3366',
           dark: '#E61E4D'
+        },
+        glass: {
+          light: "rgba(255, 255, 255, 0.1)",
+          dark: "rgba(0, 0, 0, 0.1)",
+        },
+        glow: {
+          primary: "rgba(99, 102, 241, 0.15)",
+          secondary: "rgba(168, 85, 247, 0.15)",
         }
       },
       borderRadius: {
@@ -158,6 +166,14 @@ module.exports = {
           '0%': { transform: 'translateY(100%)' },
           '100%': { transform: 'translateY(0)' },
         },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        glow: {
+          '0%, 100%': { opacity: 0.5 },
+          '50%': { opacity: 1 },
+        },
       },
       animation: {
         ring: "ring 2.2s cubic-bezier(0.5, 0, 0.5, 1) infinite",
@@ -176,11 +192,29 @@ module.exports = {
         "fade-in": 'fade-in 0.5s ease-in-out',
         "slide-in": 'slide-in 0.5s ease-in-out',
         "slide-up": 'slide-up 0.5s ease-in-out',
+        'float': 'float 6s ease-in-out infinite',
+        'glow': 'glow 4s ease-in-out infinite',
+      },
+      backgroundImage: {
+        'glass-gradient': 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+        'glass-gradient-dark': 'linear-gradient(145deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%)',
+        'glow-gradient': 'radial-gradient(circle at center, var(--tw-gradient-from), transparent 70%)',
+      },
+      boxShadow: {
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+        'glass-dark': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'glass-sm': '0 4px 16px 0 rgba(31, 38, 135, 0.05)',
+        'glass-dark-sm': '0 4px 16px 0 rgba(0, 0, 0, 0.25)',
+        'neon': '0 0 20px var(--tw-shadow-color)',
+      },
+      backdropBlur: {
+        'glass': '10px',
       },
     },
   },
   plugins: [
     require("@tailwindcss/typography"),
+    require("@tailwindcss/container-queries"),
     nextui({
       themes: {
         dark: {
