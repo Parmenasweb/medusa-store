@@ -1,16 +1,10 @@
-import { Metadata } from "next"
-
-import { listCartOptions, retrieveCart } from "@lib/data/cart"
+import { retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
-import { getBaseURL } from "@lib/util/env"
+import { listCartOptions } from "@lib/data/fulfillment"
 import { StoreCartShippingOption } from "@medusajs/types"
-import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
+import CartMismatchBanner from "@modules/cart/components/cart-mismatch-banner"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
-import { FavoritesProvider } from "@lib/providers/favorites-provider"
-
-export const metadata: Metadata = {
-  metadataBase: new URL(getBaseURL()),
-}
+import { FavoritesProvider } from "@lib/context/favorites-context"
 
 export default async function PageLayout(props: { children: React.ReactNode }) {
   const customer = await retrieveCustomer()
@@ -39,4 +33,4 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       {props.children}
     </FavoritesProvider>
   )
-}
+} 

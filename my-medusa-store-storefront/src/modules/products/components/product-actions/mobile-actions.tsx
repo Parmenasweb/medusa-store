@@ -1,3 +1,5 @@
+"use client"
+
 import { Dialog, Transition } from "@headlessui/react"
 import { Button, clx } from "@medusajs/ui"
 import React, { Fragment, useMemo } from "react"
@@ -9,6 +11,8 @@ import X from "@modules/common/icons/x"
 import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
 import { HttpTypes } from "@medusajs/types"
+import { useFavorites } from "@lib/context/favorites-context"
+import { Heart } from "lucide-react"
 
 type MobileActionsProps = {
   product: HttpTypes.StoreProduct
@@ -34,6 +38,17 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   optionsDisabled,
 }) => {
   const { state, open, close } = useToggleState()
+  const { isFavorite, addToFavorites, removeFromFavorites } = useFavorites()
+
+  const isProductFavorite = isFavorite(product.id)
+
+  const handleFavoriteClick = () => {
+    if (isProductFavorite) {
+      removeFromFavorites(product.id)
+    } else {
+      addToFavorites(product.id)
+    }
+  }
 
   const price = getProductPrice({
     product: product,
@@ -66,65 +81,73 @@ const MobileActions: React.FC<MobileActionsProps> = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div
-            className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200"
-            data-testid="mobile-actions"
-          >
-            <div className="flex items-center gap-x-2">
-              <span data-testid="mobile-title">{product.title}</span>
-              <span>—</span>
-              {selectedPrice ? (
-                <div className="flex items-end gap-x-2 text-ui-fg-base">
-                  {selectedPrice.price_type === "sale" && (
-                    <p>
-                      <span className="line-through text-small-regular">
-                        {selectedPrice.original_price}
-                      </span>
-                    </p>
-                  )}
-                  <span
-                    className={clx({
-                      "text-ui-fg-interactive":
-                        selectedPrice.price_type === "sale",
-                    })}
-                  >
-                    {selectedPrice.calculated_price}
-                  </span>
-                </div>
-              ) : (
-                <div></div>
-              )}
+          <div className="bg-white dark:bg-emperor-900 flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200 dark:border-emperor-800">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-x-2">
+                <span data-testid="mobile-title">{product.title}</span>
+                <span>—</span>
+                {selectedPrice ? (
+                  <div className="flex items-end gap-x-2 text-ui-fg-base">
+                    {selectedPrice.price_type === "sale" && (
+                      <p>
+                        <span className="line-through text-small-regular">
+                          {selectedPrice.original_price}
+                        </span>
+                      </p>
+                    )}
+                    <span
+                      className={clx({
+                        "text-ui-fg-interactive":
+                          selectedPrice.price_type === "sale",
+                      })}
+                    >
+                      {selectedPrice.calculated_price}
+                    </span>
+                  </div>
+                ) : (
+                  <div></div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handleFavoriteClick}
+                  variant="secondary"
+                  className={`w-10 h-10 rounded-xl backdrop-blur-glass shadow-glass dark:shadow-glass-dark flex items-center justify-center transition-colors ${
+                    isProductFavorite 
+                      ? 'bg-red-500 hover:bg-red-600' 
+                      : 'bg-glass-gradient dark:bg-glass-gradient-dark hover:opacity-80'
+                  }`}
+                >
+                  <Heart 
+                    className={`w-5 h-5 ${
+                      isProductFavorite 
+                        ? 'fill-white text-white' 
+                        : 'text-emperor-950 dark:text-white'
+                    }`} 
+                  />
+                </Button>
+                <Button
+                  onClick={open}
+                  variant="secondary"
+                  className="w-10 h-10 rounded-xl bg-glass-gradient dark:bg-glass-gradient-dark backdrop-blur-glass shadow-glass dark:shadow-glass-dark flex items-center justify-center hover:opacity-80 transition-opacity"
+                >
+                  <ChevronDown className="w-5 h-5 text-emperor-950 dark:text-white" />
+                </Button>
+              </div>
             </div>
-            <div className="grid grid-cols-2 w-full gap-x-4">
-              <Button
-                onClick={open}
-                variant="secondary"
-                className="w-full"
-                data-testid="mobile-actions-button"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>
-                    {variant
-                      ? Object.values(options).join(" / ")
-                      : "Select Options"}
-                  </span>
-                  <ChevronDown />
-                </div>
-              </Button>
-              <Button
-                onClick={handleAddToCart}
-                disabled={!inStock || !variant}
-                className="w-full"
-                isLoading={isAdding}
-                data-testid="mobile-cart-button"
-              >
-                {!variant
-                  ? "Select variant"
-                  : !inStock
-                  ? "Out of stock"
-                  : "Add to cart"}
-              </Button>
-            </div>
+            <Button
+              onClick={handleAddToCart}
+              disabled={!inStock || !variant || optionsDisabled || isAdding}
+              variant="primary"
+              className="w-full h-12 rounded-xl bg-emperor-950 dark:bg-white text-white dark:text-emperor-950 hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              isLoading={isAdding}
+            >
+              {!variant
+                ? "Select variant"
+                : !inStock
+                ? "Out of stock"
+                : "Add to cart"}
+            </Button>
           </div>
         </Transition>
       </div>
@@ -143,7 +166,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
           </Transition.Child>
 
           <div className="fixed bottom-0 inset-x-0">
-            <div className="flex min-h-full h-full items-center justify-center text-center">
+            <div className="flex min-h-full h-full items-end justify-center text-center">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -153,35 +176,32 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Dialog.Panel
-                  className="w-full h-full transform overflow-hidden text-left flex flex-col gap-y-3"
-                  data-testid="mobile-actions-modal"
-                >
-                  <div className="w-full flex justify-end pr-6">
+                <Dialog.Panel className="w-full h-full transform overflow-hidden bg-white dark:bg-emperor-900 p-5 text-left align-middle shadow-xl transition-all flex flex-col justify-between">
+                  <div className="flex justify-end mb-6">
                     <button
                       onClick={close}
-                      className="bg-white w-12 h-12 rounded-full text-ui-fg-base flex justify-center items-center"
-                      data-testid="close-modal-button"
+                      className="bg-gray-100 dark:bg-emperor-800 p-2 rounded-full"
                     >
-                      <X />
+                      <X className="w-6 h-6 text-emperor-950 dark:text-white" />
                     </button>
                   </div>
-                  <div className="bg-white px-6 py-12">
-                    {(product.variants?.length ?? 0) > 1 && (
-                      <div className="flex flex-col gap-y-6">
-                        {(product.options || []).map((option) => {
-                          return (
-                            <div key={option.id}>
-                              <OptionSelect
-                                option={option}
-                                current={options[option.title ?? ""]}
-                                updateOption={updateOptions}
-                                title={option.title ?? ""}
-                                disabled={optionsDisabled}
-                              />
-                            </div>
-                          )
-                        })}
+                  <div className="flex flex-col gap-y-6">
+                    {product.variants.length > 1 && (
+                      <div className="flex flex-col gap-y-4">
+                        <div className="flex flex-col gap-y-4">
+                          {product.options.map((option) => {
+                            return (
+                              <div key={option.id}>
+                                <OptionSelect
+                                  option={option}
+                                  current={options[option.id]}
+                                  updateOption={updateOptions}
+                                  title={option.title}
+                                />
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -194,5 +214,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
     </>
   )
 }
+
+MobileActions.displayName = "MobileActions"
 
 export default MobileActions

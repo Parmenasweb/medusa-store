@@ -1,11 +1,12 @@
+"use client"
+
 import { Button, Container, Text } from "@medusajs/ui"
-import { cookies as nextCookies } from "next/headers"
 
-async function ProductOnboardingCta() {
-  const cookies = await nextCookies()
+type ProductOnboardingCtaProps = {
+  isOnboarding: boolean
+}
 
-  const isOnboarding = cookies.get("_medusa_onboarding")?.value === "true"
-
+function ProductOnboardingCta({ isOnboarding }: ProductOnboardingCtaProps) {
   if (!isOnboarding) {
     return null
   }

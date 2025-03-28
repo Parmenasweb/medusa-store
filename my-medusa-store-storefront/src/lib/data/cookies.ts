@@ -83,3 +83,8 @@ export const removeCartId = async () => {
     maxAge: -1,
   })
 }
+
+export const getOnboardingState = async (): Promise<boolean> => {
+  const cookies = await nextCookies()
+  return cookies.get("_medusa_onboarding")?.value === "true"
+}

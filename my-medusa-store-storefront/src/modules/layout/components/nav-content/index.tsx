@@ -2,17 +2,20 @@
 
 import { Suspense } from "react"
 import { motion } from "framer-motion"
-import { StoreRegion } from "@medusajs/types"
+import { StoreRegion, StoreProductCategory } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import ThemeToggle from "@modules/layout/components/theme-toggle"
+import Search from "@modules/layout/components/search"
+import NavCategories from "@modules/layout/components/nav-categories"
 
-type NavContentProps = {
+interface NavContentProps {
   regions: StoreRegion[]
+  categories: StoreProductCategory[]
 }
 
-export default function NavContent({ regions }: NavContentProps) {
+export default function NavContent({ regions, categories }: NavContentProps) {
   return (
     <motion.div 
       className="sticky top-0 inset-x-0 z-50 group"
@@ -39,6 +42,7 @@ export default function NavContent({ regions }: NavContentProps) {
 
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
             <div className="hidden small:flex items-center gap-x-6 h-full">
+              <NavCategories categories={categories} />
               <LocalizedClientLink
                 className="text-emperor-600 hover:text-accent dark:text-emperor-300 dark:hover:text-accent transition-colors duration-200"
                 href="/store"
@@ -51,6 +55,7 @@ export default function NavContent({ regions }: NavContentProps) {
               >
                 Account
               </LocalizedClientLink>
+              <Search />
             </div>
             <ThemeToggle />
             <Suspense
